@@ -4,9 +4,9 @@ import {useEffect, useState} from "react";
 import {HashRouter, NavLink, Route} from "react-router-dom";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
-    AppBar,
-    Button,
-    Dialog, DialogActions, DialogContent,
+    AppBar, Avatar, Box,
+    Button, Checkbox, Container, CssBaseline,
+    Dialog, DialogActions, DialogContent, FormControlLabel, Grid, IconButton, Link,
     makeStyles,
     Menu,
     MenuItem, TextField,
@@ -14,6 +14,7 @@ import {
     Typography
 } from "@material-ui/core";
 import {
+    faBars,
     faCheckCircle,
     faChevronDown,
     faChevronUp,
@@ -27,6 +28,9 @@ import {
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
+    },
+    appBar: {
+        background: "#ffb74d",
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -52,18 +56,22 @@ const App = () => {
     return (
         <HashRouter>
             <div className={classes.root}>
-                <AppBar position="static">
+                <AppBar position="static" className={classes.appBar}>
                     <Toolbar>
-                        <Typography className={classes.title} varaint={"h2"}>Shopping List</Typography>
-                        <NavLink className={classes.menuButton} exact to={"/"}>Shopping Lists</NavLink>
-                        <NavLink className={classes.menuButton} to={"/home2"}>Home2</NavLink>
+                        <IconButton edge="start" className={classes.menuButton} color="inherit">
+                            <FontAwesomeIcon icon={faBars}/>
+                        </IconButton>
+                        <Typography className={classes.title} varaint={"h2"}>Einkaufsliste für <i>Unsere
+                            Kochrezepte</i></Typography>
+                        <NavLink className={classes.menuButton} exact to={"/"}>Listen Übersicht</NavLink>
+                        <NavLink className={classes.menuButton} to={"/login"}>Login</NavLink>
                         <NavLink className={classes.menuButton} to={"/home3"}>Home3</NavLink>
                     </Toolbar>
                 </AppBar>
             </div>
             <div className="routes">
                 <Route exact path="/" component={ShoppingLists}/>
-                <Route path="/home2" component={Home2}/>
+                <Route path="/login" component={Login}/>
                 <Route path="/home3" component={Home3}/>
             </div>
         </HashRouter>
@@ -73,26 +81,12 @@ const App = () => {
 const ShoppingLists = () => {
     const classes = useStyles();
 
-    // const [lists, setLists] = useState(() => {
-    //     let data = "";
-    //     for (let i = 0, len = localStorage.length; i < len; i++) {
-    //         data +=JSON.parse(localStorage.getItem(localStorage.key(i)));
-    //     }
-    //     return data;
-    // });
-
-        // ||
-        // [
-        //     {listName: "List1"},
-        //     {listName: "List2"},
-        // ])
-
     const [listNames, setlistNames] = useState(
-        localStorage.getItem("ListNames")
+        JSON.parse(localStorage.getItem("ListNames"))
         ||
         [
-        {listName: "List1"},
-        {listName: "List2"},
+            {listName: "List1"},
+            {listName: "List2"},
         ]
     );
 
@@ -100,25 +94,30 @@ const ShoppingLists = () => {
         localStorage.setItem("ListNames", JSON.stringify(listNames));
     });
 
-    // const getListNames = () => {
-    //     let newListNames = [];
-    //     for (let i = 0, len = localStorage.length; i < len; i++) {
-    //         const newListName = [
-    //             {listName: JSON.parse(localStorage.getItem(localStorage.key(i)))},
-    //         ]
-    //         newListNames = [...newListNames, newListName];
-    //     }
-    //     setLists(newListNames);
-    // };
-
     const [listNameValue, setListNameValue] = useState("");
 
-    const handleAddList = () => {
-
+    const handleAddList = (newListName) => {
+        if (!listNames.some(item => item.listName === newListName)) {
+            const newList = {listName: newListName};
+            const newListNames = [...listNames, newList];
+            setlistNames(newListNames);
+        }
     };
 
-    const handleDeleteList = () => {
+    const handleDeleteList = (index, oldListName) => {
+        const newListNames = [...listNames];
+        newListNames.splice(index, 1);
+        localStorage.removeItem(oldListName);
+        setlistNames(newListNames);
+    };
 
+    const handleListNameChange = (index, newListName, oldListName) => {
+        if (!listNames.some(item => item.listName === newListName)) {
+            const newListNames = [...listNames];
+            newListNames[index].listName = newListName;
+            localStorage.removeItem(oldListName);
+            setlistNames(newListNames);
+        }
     };
 
     const [openDialog, setOpenDialog] = useState(false);
@@ -134,9 +133,11 @@ const ShoppingLists = () => {
     return (
         <div className={classes.flex}>
             <Button onClick={handleDialogAddListOpen}>
-                <FontAwesomeIcon icon={faPlus} className="fontAwesomeIcon"/>
+                <FontAwesomeIcon icon={faPlus}
+                                 className="fontAwesomeIcon"/>
             </Button>
-            <Dialog open={openDialog} onClose={handleDialogAddListClose}>
+            <Dialog open={openDialog}
+                    onClose={handleDialogAddListClose}>
                 <DialogContent>
                     <TextField id="inputField"
                                onChange={(event) => setListNameValue(event.target.value)}
@@ -148,7 +149,7 @@ const ShoppingLists = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button id="submit-button" onClick={() => {
-                        handleAddList();
+                        handleAddList(listNameValue);
                         handleDialogAddListClose();
                     }}>
                         Bestätigen
@@ -158,10 +159,12 @@ const ShoppingLists = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-
             {listNames.map((list, index) => (
                 <div key={index} className="shopping-lists-container">
-                    <ShoppingList name={list.listName} closeFunction={handleDeleteList()}/>
+                    <ShoppingList name={list.listName}
+                                  deleteFunction={handleDeleteList}
+                                  nameChangeFunction={handleListNameChange}
+                                  index={index}/>
                 </div>
             ))}
         </div>
@@ -171,18 +174,11 @@ const ShoppingLists = () => {
 const ShoppingList = (props) => {
     const classes = useStyles();
 
-    //List Name and Value
-    const [listName, setListName] = useState(
-        JSON.parse(localStorage.getItem(props.name))[0]
-        ||
-        "Meine Liste"
-    );
-
     const [listNameValue, setListNameValue] = useState("");
 
     //Items Array with Inputvalue for new Items and Total Itemcount
     const [items, setItems] = useState(
-        JSON.parse(localStorage.getItem(props.name))[1]
+        JSON.parse(localStorage.getItem(props.name))
         ||
         [
             {itemName: "Banane", quantity: 1, isSelected: false},
@@ -198,12 +194,12 @@ const ShoppingList = (props) => {
     //UseEffect for every Rerender
     useEffect(() => {
         calcNewTotal();
-        localStorage.setItem(props.name, JSON.stringify([listName, items]));
+        localStorage.setItem(props.name, JSON.stringify(items));
     });
 
     //List Operations
     const handleAddButtonClick = () => {
-        if (inputValue !== "") {
+        if (inputValue !== "" && !items.some(temp => temp.itemName === inputValue)) {
             const newItem = {
                 itemName: inputValue,
                 quantity: 1,
@@ -212,6 +208,8 @@ const ShoppingList = (props) => {
 
             const newItems = [...items, newItem];
             setItems(newItems);
+            setInputValue("");
+        } else {
             setInputValue("");
         }
     };
@@ -229,7 +227,6 @@ const ShoppingList = (props) => {
             newItems[index].quantity--;
         }
         setItems(newItems);
-        // calcNewTotal();
     };
 
     const handleDeleteItem = (index) => {
@@ -273,15 +270,11 @@ const ShoppingList = (props) => {
         setOpen(false);
     };
 
-    const handleChangeListName = () => {
-        setListName(listNameValue);
-    };
-
     return (
         <div className={classes.shoppingList}>
             <div className="main-container">
                 <div className="list-header">
-                    <span>{listName}</span>
+                    <span>{props.name}</span>
                     <Button aria-controls="list-menu"
                             aria-haspopup="true"
                             onClick={handleOpenSettings}>
@@ -300,6 +293,7 @@ const ShoppingList = (props) => {
                         </MenuItem>
                         <MenuItem onClick={() => {
                             handleCloseSettings();
+                            props.deleteFunction(props.index, props.name);
                         }}>Delete List</MenuItem>
                     </Menu>
                     <Dialog open={open}
@@ -316,7 +310,7 @@ const ShoppingList = (props) => {
                         </DialogContent>
                         <DialogActions>
                             <Button id="submit-button" onClick={() => {
-                                handleChangeListName();
+                                props.nameChangeFunction(props.index, listNameValue, props.name);
                                 handleListNameChangeCloseDialog();
                             }}>
                                 Bestätigen
@@ -348,15 +342,15 @@ const ShoppingList = (props) => {
                                     </div>
                                 )}
                             </div>
-                            <div className="quantity-container">
+                            <div className="quantity-delete-container">
                                 <FontAwesomeIcon className="fontAwesomeIcon" icon={faChevronUp}
                                                  onClick={() => handleIncreaseQuantity(index)}/>
                                 <span>{item.quantity}</span>
                                 <FontAwesomeIcon className="fontAwesomeIcon" icon={faChevronDown}
                                                  onClick={() => handleDecreaseQuantity(index)}/>
+                                <FontAwesomeIcon icon={faTrash} onClick={() => handleDeleteItem(index)}/>
                             </div>
                             <div className="delete-container">
-                                <FontAwesomeIcon icon={faTrash} onClick={() => handleDeleteItem(index)}/>
                             </div>
                         </div>
                     ))}
@@ -369,10 +363,103 @@ const ShoppingList = (props) => {
     )
 }
 
-const Home2 = () => {
+const Login = () => {
+    const useStyles = makeStyles((theme) => ({
+        paper: {
+            marginTop: theme.spacing(8),
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+        avatar: {
+            margin: theme.spacing(1),
+            backgroundColor: theme.palette.secondary.main,
+        },
+        form: {
+            width: '100%', // Fix IE 11 issue.
+            marginTop: theme.spacing(1),
+        },
+        submit: {
+            margin: theme.spacing(3, 0, 2),
+        },
+    }));
+
+    const classes = useStyles();
+
     return (
         <div className="background">
-            <p>Home2 Stuff</p>
+            <p>Login Stuff</p>
+            <Container component="main" maxWidth="xs">
+                <CssBaseline/>
+                <div className={classes.paper}>
+                    <Avatar className={classes.avatar}>
+                        {/*<LockOutlinedIcon/>*/}
+                    </Avatar>
+                    <Typography component="h1" variant="h5">
+                        Sign in
+                    </Typography>
+                    <form className={classes.form} noValidate>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="email"
+                            label="Email Address"
+                            name="email"
+                            autoComplete="email"
+                            autoFocus
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Password"
+                            type="password"
+                            id="password"
+                            autoComplete="current-password"
+                        />
+                        <FormControlLabel
+                            control={<Checkbox value="remember" color="primary"/>}
+                            label="Remember me"
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            className={classes.submit}
+                        >
+                            Sign In
+                        </Button>
+                        <Grid container>
+                            <Grid item xs>
+                                <Link href="#" variant="body2">
+                                    Forgot password?
+                                </Link>
+                            </Grid>
+                            <Grid item>
+                                <Link href="#" variant="body2">
+                                    {"Don't have an account? Sign Up"}
+                                </Link>
+                            </Grid>
+                        </Grid>
+                    </form>
+                </div>
+                <Box mt={8}>
+                    {/*<Copyright />*/}
+                </Box>
+            </Container>
+            <Typography variant="body2" color="textSecondary" align="center">
+                {'Copyright © '}
+                <Link color="inherit" href="https://material-ui.com/">
+                    Your Website
+                </Link>{' '}
+                {new Date().getFullYear()}
+                {'.'}
+            </Typography>
         </div>
     )
 }
