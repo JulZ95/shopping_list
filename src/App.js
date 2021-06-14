@@ -24,6 +24,7 @@ import {
 } from "@material-ui/core";
 import {faBars, faPlus} from "@fortawesome/free-solid-svg-icons";
 import ShoppingList from "./Components/ShoppingList";
+import ListCreator from "./Components/ListCreator";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -37,11 +38,6 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         flexGrow: 1,
-    },
-    flex: {
-        display: "flex",
-        justifyContent: "center",
-        flexWrap: "wrap",
     },
 }));
 
@@ -60,22 +56,20 @@ const App = () => {
                             Kochrezepte</i></Typography>
                         <NavLink className={classes.menuButton} exact to={"/"}>Listen Übersicht</NavLink>
                         <NavLink className={classes.menuButton} to={"/login"}>Login</NavLink>
-                        <NavLink className={classes.menuButton} to={"/home3"}>Home3</NavLink>
+                        <NavLink className={classes.menuButton} to={"/listCreator"}>ListCreatorView</NavLink>
                     </Toolbar>
                 </AppBar>
             </div>
             <div className="routes">
                 <Route exact path="/" component={ShoppingLists}/>
                 <Route path="/login" component={Login}/>
-                <Route path="/home3" component={Home3}/>
+                <Route path="/listCreator" component={ListCreatorView}/>
             </div>
         </HashRouter>
     );
 }
 
 const ShoppingLists = () => {
-    const classes = useStyles();
-
     const [listNames, setlistNames] = useState(
         JSON.parse(localStorage.getItem("ListNames"))
         ||
@@ -126,11 +120,16 @@ const ShoppingLists = () => {
     };
 
     return (
-        <div className={classes.flex}>
-            <Button onClick={handleDialogAddListOpen}>
-                <FontAwesomeIcon icon={faPlus}
-                                 className="fontAwesomeIcon"/>
-            </Button>
+        <div className="mainContainer">
+            <div className="nav">
+                <div className="buttonContainer">
+                    <button className="addNewListButton"
+                            onClick={handleDialogAddListOpen}>
+                        <FontAwesomeIcon icon={faPlus}
+                                         className="fontAwesomeIcon"/>
+                    </button>
+                </div>
+            </div>
             <Dialog open={openDialog}
                     onClose={handleDialogAddListClose}>
                 <DialogContent>
@@ -154,14 +153,16 @@ const ShoppingLists = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            {listNames.map((list, index) => (
-                <div key={index} className="shopping-lists-container">
-                    <ShoppingList name={list.listName}
-                                  deleteFunction={handleDeleteList}
-                                  nameChangeFunction={handleListNameChange}
-                                  index={index}/>
-                </div>
-            ))}
+            <div className="main">
+                    {listNames.map((list, index) => (
+                        <div key={index} className="shopping-lists-container">
+                            <ShoppingList name={list.listName}
+                                          deleteFunction={handleDeleteList}
+                                          nameChangeFunction={handleListNameChange}
+                                          index={index}/>
+                        </div>
+                    ))}
+            </div>
         </div>
     )
 }
@@ -267,10 +268,12 @@ const Login = () => {
     )
 }
 
-const Home3 = () => {
+const ListCreatorView = () => {
     return (
-        <div className="background">
-            <p>Home3 Stuff</p>
+        <div className="mainContainer">
+            <div className="main">
+                <ListCreator name="ListName"/>
+            </div>
         </div>
     )
 }

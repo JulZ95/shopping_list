@@ -1,52 +1,43 @@
 import "./ShoppingList.css";
 import React, {useEffect, useState} from "react";
-import {
-    Button,
-    Card, CardContent, CardHeader,
-    Dialog,
-    DialogActions,
-    DialogContent, IconButton,
-    makeStyles,
-    Menu,
-    MenuItem,
-    TextField, withStyles
-} from "@material-ui/core";
+import {Button, Dialog, DialogActions, DialogContent, makeStyles, Menu, MenuItem, TextField} from "@material-ui/core";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
     faCheckCircle,
     faChevronDown,
     faChevronUp,
     faCircle,
-    faPlus, faTrash
+    faEllipsisV,
+    faPlus,
+    faTrash
 } from "@fortawesome/free-solid-svg-icons";
-import {MoreVert} from "@material-ui/icons";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        // display: "flex",
-        // justifyContent: "center",
-        margin: 10,
-    },
-    headerStyling: {
-        height: 20,
-        fontSize: 10,
-        // display: "flex",
-        // justifyContent: "center",
-    },
-    cardHeaderTitle: {
-        fontSize: "1rem",
-    },
-    cardHeaderAction: {
-        fontSize: "1rem",
-        color: "Black",
-    },
-    settingsButton: {
-        width: 20,
-    },
-}));
+// const useStyles = makeStyles((theme) => ({
+//     root: {
+//         // display: "flex",
+//         // justifyContent: "center",
+//         margin: 10,
+//     },
+//     headerStyling: {
+//         height: 20,
+//         fontSize: 10,
+//         // display: "flex",
+//         // justifyContent: "center",
+//     },
+//     cardHeaderTitle: {
+//         fontSize: "1rem",
+//     },
+//     cardHeaderAction: {
+//         fontSize: "1rem",
+//         color: "Black",
+//     },
+//     settingsButton: {
+//         width: 20,
+//     },
+// }));
 
 const ShoppingList = (props) => {
-    const classes = useStyles();
+    // const classes = useStyles();
 
     const [listNameValue, setListNameValue] = useState("");
 
@@ -145,101 +136,120 @@ const ShoppingList = (props) => {
     };
 
     return (
-        <Card className={classes.root}>
-            <CardHeader classes={{title: classes.cardHeaderTitle, action: classes.cardHeaderAction}}
-                        action={
-                            <div className="headerWrapper">
-                                <IconButton className={classes.settingsButton}
-                                            variant="outlined"
-                                            aria-label="settings" aria-controls="list-menu" aria-haspopup="true"
-                                            onClick={handleOpenSettings}>
-                                    {/*<FontAwesomeIcon icon={faEllipsisV}/>*/}
-                                    <MoreVert/>
-                                </IconButton>
+        <div className="listContainer">
+            <span className="listHeaderTitle">{props.name}</span>
+            <button className="listHeaderSettings"
+                    aria-label="settings" aria-controls="listMenu" aria-haspopup="true"
+                    onClick={handleOpenSettings}>
+                <FontAwesomeIcon icon={faEllipsisV}/>
+            </button>
 
-                                <Menu id="list-menu"
-                                      anchorEl={anchorEL}
-                                      open={Boolean(anchorEL)}
-                                      onClose={handleCloseSettings}>
-                                    <MenuItem onClick={() => {
-                                        handleCloseSettings();
-                                        handleListNameChangeOpenDialog();
-                                    }}>
-                                        Liste Umbenennen
-                                    </MenuItem>
-                                    <MenuItem onClick={() => {
-                                        handleCloseSettings();
-                                        props.deleteFunction(props.index, props.name);
-                                    }}>Delete List</MenuItem>
-                                </Menu>
+            <div>
+                <Menu id="listMenu"
+                      anchorEl={anchorEL}
+                      open={Boolean(anchorEL)}
+                      onClose={handleCloseSettings}>
+                    <MenuItem onClick={() => {
+                        handleCloseSettings();
+                        handleListNameChangeOpenDialog();
+                    }}>
+                        Liste Umbenennen
+                    </MenuItem>
+                    <MenuItem onClick={() => {
+                        handleCloseSettings();
+                        props.deleteFunction(props.index, props.name);
+                    }}>Delete List</MenuItem>
+                </Menu>
 
-                                <Dialog open={open}
-                                        onClose={handleListNameChangeCloseDialog}
-                                        aria-labelledby="form-dialog-title">
-                                    <DialogContent>
-                                        <TextField id="inputField"
-                                                   onChange={(event) => setListNameValue(event.target.value)}
-                                                   autoFocus={true}
-                                                   margin="dense"
-                                                   label="Neuer Listenname"
-                                                   type="text"
-                                                   fullWidth={true}/>
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button id="submit-button" onClick={() => {
-                                            props.nameChangeFunction(props.index, listNameValue, props.name);
-                                            handleListNameChangeCloseDialog();
-                                        }}>
-                                            Bestätigen
-                                        </Button>
-                                        <Button id="cancel-button" onClick={handleListNameChangeCloseDialog}>
-                                            Abbrechen
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
-                            </div>
+                <Dialog open={open}
+                        onClose={handleListNameChangeCloseDialog}
+                        aria-labelledby="form-dialog-title">
+                    <DialogContent>
+                        <TextField id="inputField"
+                                   onChange={(event) => setListNameValue(event.target.value)}
+                                   autoFocus={true}
+                                   margin="dense"
+                                   label="Neuer Listenname"
+                                   type="text"
+                                   fullWidth={true}/>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button id="submit-button" onClick={() => {
+                            props.nameChangeFunction(props.index, listNameValue, props.name);
+                            handleListNameChangeCloseDialog();
+                        }}>
+                            Bestätigen
+                        </Button>
+                        <Button id="cancel-button" onClick={handleListNameChangeCloseDialog}>
+                            Abbrechen
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
 
-                        } title={props.name}/>
+            <div className="divider1"/>
 
+            <input value={inputValue} onChange={(event => setInputValue(event.target.value))}
+                   className="listNewItemInput" placeholder="Add an item..."/>
+            {/*<div className="listNewItemInput">*/}
+            {/*</div>*/}
 
-            <CardContent className="item-input">
-                <input value={inputValue} onChange={(event => setInputValue(event.target.value))}
-                       className="add-item-input" placeholder="Add an item..."/>
-                <FontAwesomeIcon className="fontAwesomeIcon" icon={faPlus} onClick={() => handleAddButtonClick()}/>
-            </CardContent>
-            <CardContent className="items">
+            <button className="listNewItemAddButton"
+                    aria-label="addButton" aria-controls="" aria-haspopup="false"
+                    onClick={handleAddButtonClick}>
+                <FontAwesomeIcon icon={faPlus}/>
+            </button>
+
+            <div className="divider2"/>
+
+            <div className="listItems">
                 {items.map((item, index) => (
-                    <div key={index}>
-                        <div className="item-container" onClick={() => toggleComplete(index)}>
+                    <div className="listItemTest" key={index}>
+                        <div className="itemContainer" onClick={() => toggleComplete(index)}>
                             {item.isSelected ? (
                                 <div>
-                                    <FontAwesomeIcon className="fontAwesomeIcon" icon={faCheckCircle}/>
-                                    <span className="completed">{item.itemName}</span>
+                                    <button className="itemCompletedButton listItemButton">
+                                        <FontAwesomeIcon icon={faCheckCircle}/>
+                                    </button>
+                                    <span className="completedItem">{item.itemName}</span>
                                 </div>
                             ) : (
                                 <div>
-                                    <FontAwesomeIcon className="fontAwesomeIcon" icon={faCircle}/>
+                                    <button className="itemCompletedButton listItemButton">
+                                        <FontAwesomeIcon icon={faCircle}/>
+                                    </button>
                                     <span>{item.itemName}</span>
                                 </div>
                             )}
                         </div>
-                        <div className="quantity-delete-container">
-                            <FontAwesomeIcon className="fontAwesomeIcon" icon={faChevronUp}
-                                             onClick={() => handleIncreaseQuantity(index)}/>
-                            <span>{item.quantity}</span>
-                            <FontAwesomeIcon className="fontAwesomeIcon" icon={faChevronDown}
-                                             onClick={() => handleDecreaseQuantity(index)}/>
-                            <FontAwesomeIcon icon={faTrash} onClick={() => handleDeleteItem(index)}/>
-                        </div>
-                        <div className="delete-container">
-                        </div>
+
+                        <button className="listItemIncreaseQuantityButton listItemButton"
+                                aria-label="" aria-controls="" aria-haspopup="false"
+                                onClick={() => handleIncreaseQuantity(index)}>
+                            <FontAwesomeIcon icon={faChevronUp}/>
+                        </button>
+
+                        <span className="listItemQuantity">{item.quantity}</span>
+
+                        <button className="listItemDecreaseQuantityButton listItemButton"
+                                aria-label="" aria-controls="" aria-haspopup="false"
+                                onClick={() => handleDecreaseQuantity(index)}>
+                            <FontAwesomeIcon icon={faChevronDown}/>
+                        </button>
+
+                        <button className="listItemDeleteItemButton listItemButton"
+                                aria-label="" aria-controls="" aria-haspopup="false"
+                                onClick={() => handleDeleteItem(index)}>
+                            <FontAwesomeIcon icon={faTrash}/>
+                        </button>
+                        <div className="divider3"/>
                     </div>
                 ))}
-            </CardContent>
-            <CardContent className="total-quantity">
+            </div>
+            <div className="listTotalQuantity">
                 Warenkorbanzahl: {totalItemCount}
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }
 
