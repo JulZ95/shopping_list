@@ -51,11 +51,10 @@
   height: 100vh;
   grid-template:
                  [main-left]   "nav  main" 1fr  [main-right]
-                 / 120px 1fr;
+                 / 60px 1fr;
 
   background: linear-gradient(90deg, rgba(162,162,162,1) 0%, rgba(175,168,134,1) 49%, rgba(255,235,171,1) 100%);
 }
-
 
 .nav {
   grid-area: nav;

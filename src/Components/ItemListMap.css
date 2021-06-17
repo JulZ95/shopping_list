@@ -1,0 +1,39 @@
+.listItems {
+    grid-column: 1 / span 4;
+    grid-row: 3;
+}
+
+.listItemContainer_ItemListMap {
+    display: grid;
+    justify-content: left;
+    grid-gap: 1em;
+    margin: 0.5em;
+}
+
+.itemContainer {
+    grid-row: 1;
+    grid-column: 1 / span 2;
+
+    width: 8em;
+}
+
+.listItemQuantity {
+    grid-row: 1;
+    grid-column: 3 / span 2;
+}
+
+.listItemButton {
+    color: #2b2b2b;
+
+    /*transition-duration: 0.4s;*/
+    cursor: pointer;
+
+    background-color: transparent;
+
+    border: 1px none lightgrey;
+    border-radius: 4px;
+}
+
+.completedItem {
+    text-decoration: line-through;
+}
