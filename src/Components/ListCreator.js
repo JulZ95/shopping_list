@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import "./ListCreator.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCheck, faPen, faPlus, faSave, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faCheck, faPen, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {useHistory, useParams} from "react-router-dom";
 
 const ListCreator = (props) => {
@@ -12,10 +12,9 @@ const ListCreator = (props) => {
         return name.replace("+", " ");
     }
 
-    useEffect(() => {
-        localStorage.setItem("ListNames", JSON.stringify(listNames));
-        localStorage.setItem(getName(), JSON.stringify(items));
-    })
+    // const addListName = () => {
+    //     const newListNames = [...listNames];
+    // }
 
     const [listNames, setListNames] = useState(
         JSON.parse(localStorage.getItem("ListNames"))
@@ -32,6 +31,34 @@ const ListCreator = (props) => {
             {itemName: "Erdbeere", quantity: 2, itemMeasurement: "pck.", isSelected: false},
         ]
     )
+
+    // useEffect(() => {
+    //     console.log("did mount");
+    //
+    //     let value = JSON.parse(localStorage.getItem("ListNames"));
+    //     const newEntry = {listName: "Neue Liste"};
+    //     value = [...value, newEntry];
+    //     localStorage.setItem("ListNames", JSON.stringify(value));
+    // }, [])
+
+    useEffect(() => {
+        localStorage.setItem("ListNames", JSON.stringify(listNames));
+        localStorage.setItem(getName(), JSON.stringify(items));
+    })
+
+    useEffect(() => {
+        return () => {
+            if(props.checkListName(getName())) {
+                localStorage.removeItem("Neue Liste")
+                // let value = JSON.parse(localStorage.getItem("ListNames"));
+                // const index = value.findIndex((item) => {
+                //     return item.listName === "Neue Liste";
+                // });
+                // value.splice(index, 1);
+                // localStorage.setItem("ListNames", JSON.stringify(value));
+            }
+        }
+    })
 
     const [newNameInputValue, setNewNameInputValue] = useState("");
     const [inputValue, setInputValue] = useState("");
@@ -53,6 +80,14 @@ const ListCreator = (props) => {
         }
     };
 
+    const addNewListIntoListNames = (oldListName) => {
+        if (oldListName === "Neue Liste") {
+            const newListName = {listName: "Neue Liste"};
+            const newListNames = [...listNames, newListName];
+            setListNames(newListNames);
+        }
+    }
+
     const findIndexOfJSON = (value) => {
         return listNames.findIndex((item) => {
             return item.listName === value;
@@ -63,7 +98,7 @@ const ListCreator = (props) => {
         if (inputValue !== "" && !items.some(temp => temp.itemName === inputValue)) {
             const newItem = {
                 itemName: inputValue,
-                quantity: quantityValue,
+                quantity: parseInt(quantityValue),
                 itemMeasurement: itemMeasurement,
                 isSelected: false,
             }
@@ -127,7 +162,6 @@ const ListCreator = (props) => {
     return (
         <div>
             <div className="mainContainer_ListCreator">
-                {/*<div className="listName_ListCreator">*/}
                 {!changeListNameBool ? (
                     <div className="listName_ListCreator">
                         {getName()}
@@ -140,12 +174,11 @@ const ListCreator = (props) => {
                            onChange={(event => setNewNameInputValue(event.target.value))}
                            placeholder="Neuer Listen Name..."/>
                 )}
-                {/*</div>*/}
-                {/*<div>*/}
                     {!changeListNameBool ? (
                         <button className="button_ListCreator listNameChangeName_ListCreator"
                                 onClick={() => {
                                     handleToggleChangeListNameBool();
+                                    addNewListIntoListNames(getName());
                                     setNewNameInputValue("");
                                 }}>
                             <FontAwesomeIcon icon={faPen}/>
@@ -159,34 +192,25 @@ const ListCreator = (props) => {
                             <FontAwesomeIcon icon={faCheck}/>
                         </button>
                     )}
-                {/*</div>*/}
-
-
                 <input className="newItemInputField_ListCreator"
                        value={inputValue} onChange={(event => setInputValue(event.target.value))}
                        placeholder="Gegenstandsname..."/>
 
-                {/*<div className="itemQuantity_ListCreator">*/}
                 <input className="itemQuantity_ListCreator"
                        value={quantityValue} onChange={(event => setQuantityValue(event.target.value))}
                        min={1} max={20}
                        placeholder={1} type="number"/>
-                {/*</div>*/}
-                {/*<div>*/}
+
                 <select className="itemMeasurementType_ListCreator">
                     <option value="Stück" onClick={() => setItemMeasurement("stk.")}>stk.</option>
                     <option value="Pack" onClick={() => setItemMeasurement("pck.")}>pck.</option>
                     <option value="Gramm" onClick={() => setItemMeasurement("g")}>g</option>
-                    {/*<option value="Kilogramm">kg</option>*/}
                 </select>
-                {/*</div>*/}
 
-                {/*<div className="itemAddButton_ListCreator">*/}
                 <button className="itemAddButton_ListCreator button_ListCreator"
                         onClick={handleAddButtonClick}>
                     <FontAwesomeIcon icon={faPlus}/>
                 </button>
-                {/*</div>*/}
 
                 <div className="itemMapContainer_ListCreator">
                     {items.map((item, index) => (
@@ -229,12 +253,6 @@ const ListCreator = (props) => {
                         </div>
                     ))}
                 </div>
-
-                {/*<div className="saveButton_ListCreator">*/}
-                {/*    <button className="button_ListCreator">*/}
-                {/*        <FontAwesomeIcon icon={faSave}/>*/}
-                {/*    </button>*/}
-                {/*</div>*/}
             </div>
         </div>
     )
