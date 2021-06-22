@@ -51,13 +51,39 @@
   text-decoration: underline;
 }
 
-#homeLink, #newListLink {
+#homeLink, #listViewLink, #newListLink {
   border-radius: 4px;
   transition-duration: 0.4s;
 }
 
-#homeLink:hover, #newListLink:hover {
+#homeLink .toolTipText, #listViewLink .toolTipText, #newListLink .toolTipText{
+  visibility: hidden;
+  width: 80px;
+  background-color: gray;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  /*padding: 5px 0;*/
+  padding: 1px;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  /*top: 100%;*/
+  /*left: 50%;*/
+  margin-left: -40px;
+
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+#homeLink:hover, #listViewLink:hover, #newListLink:hover{
   background-color: #722040;
+}
+
+#homeLink:hover .toolTipText, #listViewLink:hover .toolTipText, #newListLink:hover .toolTipText {
+  visibility: visible;
+  opacity: 1;
 }
 
 #createNewList:hover {
@@ -96,6 +122,7 @@
   grid-column: 1;
 
   display: flex;
+  flex-wrap: wrap;
 
   font-size: 12px;
   margin: 5px 3% 5px 3%;
@@ -114,12 +141,27 @@
   justify-content: center;
 }
 
+.userGreeting {
+  font-family: Roboto, sans-serif;
+
+  color: #f1e5e6;
+  background-color: #d3394c;
+  padding: 5px 5px;
+
+  transition-duration: 0.4s;
+
+  border-radius: 4px;
+
+  margin-right: 5px;
+}
+
 .fileDownload {
   font-family: Roboto, sans-serif;
 
   color: #f1e5e6;
   background-color: #d3394c;
   padding: 5px 5px;
+  cursor: pointer;
 
   transition-duration: 0.4s;
 
@@ -150,6 +192,7 @@
   transition-duration: 0.4s;
   background-color: #d3394c;
   padding: 5px 5px;
+  margin-right: 5px;
 
   border-radius: 4px;
 }
@@ -171,6 +214,29 @@
   }
 }
 
+.newListLabel {
+  font-family: Roboto, sans-serif;
+
+  cursor: pointer;
+  color: #f1e5e6;
+
+  transition-duration: 0.4s;
+  background-color: #d3394c;
+  padding: 5px 5px;
+
+  border-radius: 4px;
+}
+
+.newListLabel:hover {
+  background-color: #722040;
+}
+
+.newListLabel:hover > #hammerIcon {
+  transition-duration: 0s;
+  transform-origin: 10% 90%;
+  animation: rotation 1s infinite linear;
+}
+
 .buttonContainer {
   display: flex;
 
@@ -178,19 +244,17 @@
   margin: 20px;
 }
 
-.addNewListButton {
-  color: #80735b;
+/*.addNewListButton {*/
+/*  color: #80735b;*/
 
-  transition-duration: 0.4s;
-  cursor: pointer;
+/*  transition-duration: 0.4s;*/
+/*  cursor: pointer;*/
 
-  background-color: black;
+/*  background-color: black;*/
+/*  border: 1px none;*/
+/*  border-radius: 4px;*/
+/*}*/
 
-  border: 1px none lightgrey;
-  border-radius: 4px;
-}
-
-.addNewListButton:hover {
-  background-color: lightgrey;
-  border: 1px none #5c5853;
-}
+/*.addNewListButton:hover {*/
+/*  background-color: lightgrey;*/
+/*}*/

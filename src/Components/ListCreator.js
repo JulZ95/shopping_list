@@ -1,260 +1,208 @@
 import {useEffect, useState} from "react";
 import "./ListCreator.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCheck, faPen, faPlus, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {faCheck, faPlus, faSave, faTimes, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {useHistory, useParams} from "react-router-dom";
 
 const ListCreator = (props) => {
-    const {name} = useParams();
+    const {userID, listName} = useParams();
     const history = useHistory();
-
     const getName = () => {
-        return name.replace("+", " ");
+        return listName.replaceAll("+", " ");
+    }
+    const existingListIndex = JSON.parse(localStorage.getItem(userID))[0].lists.findIndex(element => element.listName === getName());
+
+    if (userID === undefined || parseInt(userID) < 1 || isNaN(parseInt(userID)) || listName === undefined || typeof listName !== "string"
+        || !(JSON.parse(localStorage.getItem("userIDs"))).some(element => element.userID === parseInt(userID))
+        || (!(JSON.parse(localStorage.getItem(userID)))[0].lists.some(element => element.listName === getName()) && listName !== "Neue+Liste")) {
+        history.push("/");
     }
 
-    // const addListName = () => {
-    //     const newListNames = [...listNames];
-    // }
-
-    const [listNames, setListNames] = useState(
-        JSON.parse(localStorage.getItem("ListNames"))
-        ||
-        [
-            {listName: "Standart Liste"},
-        ]
-    );
-
-    const [items, setItems] = useState(
-        JSON.parse(localStorage.getItem(getName()))
-        ||
-        [
-            {itemName: "Erdbeere", quantity: 2, itemMeasurement: "pck.", isSelected: false},
-        ]
-    )
-
-    // useEffect(() => {
-    //     console.log("did mount");
-    //
-    //     let value = JSON.parse(localStorage.getItem("ListNames"));
-    //     const newEntry = {listName: "Neue Liste"};
-    //     value = [...value, newEntry];
-    //     localStorage.setItem("ListNames", JSON.stringify(value));
-    // }, [])
+    const [listData, setListData] = useState(() => {
+        if (existingListIndex !== -1) {
+            console.log(JSON.parse(localStorage.getItem(userID))[0].lists);
+            return [JSON.parse(localStorage.getItem(userID))[0].lists[existingListIndex]];
+        } else {
+            const tmpListData = JSON.parse(localStorage.getItem("tmpListData"));
+            if (tmpListData !== null) {
+                return tmpListData;
+            } else {
+                return [{
+                    listName: "",
+                    items: []
+                }]
+            }
+        }
+    });
 
     useEffect(() => {
-        localStorage.setItem("ListNames", JSON.stringify(listNames));
-        localStorage.setItem(getName(), JSON.stringify(items));
-    })
+        localStorage.setItem("tmpListData", JSON.stringify(listData));
+        setNewNameInputValue(listData[0].listName);
+    }, [listData]);
 
     useEffect(() => {
         return () => {
-            if(props.checkListName(getName())) {
-                localStorage.removeItem("Neue Liste")
-                // let value = JSON.parse(localStorage.getItem("ListNames"));
-                // const index = value.findIndex((item) => {
-                //     return item.listName === "Neue Liste";
-                // });
-                // value.splice(index, 1);
-                // localStorage.setItem("ListNames", JSON.stringify(value));
-            }
+            console.log("Destory");
+            localStorage.removeItem("tmpListData");
         }
-    })
+    }, []);
 
-    const [newNameInputValue, setNewNameInputValue] = useState("");
-    const [inputValue, setInputValue] = useState("");
-    const [quantityValue, setQuantityValue] = useState(1);
-    const [itemMeasurement, setItemMeasurement] = useState("stk.");
-
-    const [changeListNameBool, setChangeListNameBool] = useState(false);
-    const handleToggleChangeListNameBool = () => {
-        setChangeListNameBool(!changeListNameBool);
-    }
-
-    const handleListNameChange = (newListName, oldListName) => {
-        if (!listNames.some(item => item.listName === newListName) && newListName !== "") {
-            const newListNames = [...listNames];
-            newListNames[findIndexOfJSON(oldListName)].listName = newListName;
-            setListNames(newListNames);
-            localStorage.removeItem(oldListName);
-            history.push("/listCreator/" + newListName.replace(" ", "+"));
-        }
-    };
-
-    const addNewListIntoListNames = (oldListName) => {
-        if (oldListName === "Neue Liste") {
-            const newListName = {listName: "Neue Liste"};
-            const newListNames = [...listNames, newListName];
-            setListNames(newListNames);
-        }
-    }
-
-    const findIndexOfJSON = (value) => {
-        return listNames.findIndex((item) => {
-            return item.listName === value;
-        });
-    }
-
-    const handleAddButtonClick = () => {
-        if (inputValue !== "" && !items.some(temp => temp.itemName === inputValue)) {
+    const addItemClick = () => {
+        if (itemNameInputValue !== "" && !listData[0].items.some(temp => temp.itemName === itemNameInputValue) && !parseInt(itemQuantityValue) <= 0) {
             const newItem = {
-                itemName: inputValue,
-                quantity: parseInt(quantityValue),
+                itemName: itemNameInputValue,
+                quantity: parseInt(itemQuantityValue),
                 itemMeasurement: itemMeasurement,
                 isSelected: false,
             }
 
-            const newItems = [...items, newItem];
-            setItems(newItems);
-            setInputValue("");
-            setQuantityValue(1);
-        } else {
-            setInputValue("");
-            setQuantityValue(1);
+            const newItems = [...listData];
+            newItems[0].items.push(newItem);
+            setListData(newItems);
+            setItemNameInputValue("");
+            setItemQuantityValue(1);
         }
     };
 
-    const checkIfSelected = (value, index) => {
-        return items[index].itemMeasurement === value
-    }
-
     const [updatedItemNameValue, setUpdatedItemNameValue] = useState("");
-    const [changeNameBool, setChangeNameBool] = useState(false);
-    const [indexOfChangeNameBool, setIndexOfChangeNameBool] = useState(-1);
 
-    const updateItemName = (value, index) => {
-        if (value !== "") {
-            const newItems = [...items];
-            newItems[index].itemName = value;
-            setItems(newItems);
-            setUpdatedItemNameValue("");
-        }
-        setChangeNameBool(false);
-        setIndexOfChangeNameBool(-1);
-    }
+    const [newNameInputValue, setNewNameInputValue] = useState("");
 
-    const disablePens = (index) => {
-        setChangeNameBool(true);
-        setIndexOfChangeNameBool(index);
-    }
+    const [itemNameInputValue, setItemNameInputValue] = useState("");
 
-    const penIsDisabled = (index) => {
-        return changeNameBool && !(index === indexOfChangeNameBool);
-    }
-
+    const [itemQuantityValue, setItemQuantityValue] = useState(1);
     const updateItemQuantity = (value, index) => {
-        const newItems = [...items];
-        newItems[index].quantity = value;
-        setItems(newItems);
+        const newItems = [...listData];
+        newItems[0].items[index].quantity = value;
+        setListData(newItems);
     }
 
+    const [itemMeasurement, setItemMeasurement] = useState("stk.");
     const updateItemMeasurement = (value, index) => {
-        const newItems = [...items];
-        newItems[index].itemMeasurement = value;
-        setItems(newItems);
+        const newItems = [...listData];
+        newItems[0].items[index].itemMeasurement = value;
+        setListData(newItems);
     }
 
     const deleteItemFromList = (index) => {
-        const newItems = [...items];
-        newItems.splice(index, 1);
-        setItems(newItems);
+        const newItems = [...listData];
+        newItems[0].items.splice(index, 1);
+        setListData(newItems);
+    }
+
+    const [validListNameBool, setValidListNameBool] = useState(false);
+    const checkIfListNameIsValid = () => {
+        if (newNameInputValue === "" || newNameInputValue === "Neue Liste"
+            || ((JSON.parse(localStorage.getItem(userID)))[0].lists.some(element => element.listName === newNameInputValue)
+                && !(existingListIndex !== -1 && newNameInputValue === getName()))
+        ) {
+            setValidListNameBool(false);
+        } else {
+            const newListData = [...listData];
+            newListData[0].listName = newNameInputValue;
+            setListData(newListData);
+            setValidListNameBool(true);
+        }
+        // const timeout = 700;
+        // clearTimeout();
+        // setTimeout(() => {
+        //
+        // }, timeout);
+        // clearTimeout();
+    }
+
+    useEffect(() => {
+    }, [validListNameBool])
+
+    const filterNumbers = (input) => {
+        return input.replace(/\D/g, "");
+    }
+
+    const filterLetters = (input) => {
+        return input.replace(/[^A-Za-züöäÜÖÄ-]/g, "")
+    }
+
+    const safeList = () => {
+        if (validListNameBool) {
+            if (existingListIndex === -1) {
+                const newUserListData = JSON.parse(localStorage.getItem(userID));
+                newUserListData[0].lists.push(listData[0]);
+                localStorage.setItem(userID, JSON.stringify(newUserListData));
+                history.push("/listView/" + userID);
+            } else {
+                const newUserListData = JSON.parse(localStorage.getItem(userID));
+                newUserListData[0].lists[existingListIndex].listName = listData[0].listName;
+                newUserListData[0].lists[existingListIndex].items = listData[0].items;
+                localStorage.setItem(userID, JSON.stringify(newUserListData));
+                history.push("/listView/" + userID);
+            }
+        }
     }
 
     return (
-        <div>
-            <div className="mainContainer_ListCreator">
-                {!changeListNameBool ? (
-                    <div className="listName_ListCreator">
-                        {getName()}
+        <div className="mainContainer_ListCreator">
+            <input className="listName_ListCreator" autoFocus={true} style={{
+                textAlign: "center",
+                cursor: "text"
+            }} value={newNameInputValue}
+                   onChange={(event => {
+                       setNewNameInputValue(event.target.value);
+                       // checkIfListNameIsValid(event.target.value);
+                   })} onBlur={() => checkIfListNameIsValid()}
+                   placeholder="Neuer Listen Name..."/>
+            {validListNameBool ? (
+                <FontAwesomeIcon className="checkListNameIcon_ListCreator" style={{color: "green"}} icon={faCheck}/>
+            ) : (
+                <FontAwesomeIcon className="checkListNameIcon_ListCreator" style={{color: "red"}} icon={faTimes}/>
+            )}
+            <button className="saveButton_ListCreator button_ListCreator" onClick={safeList}>
+                <FontAwesomeIcon icon={faSave}/>
+            </button>
+
+            <input className="newItemInputField_ListCreator"
+                   value={itemNameInputValue}
+                   onChange={(event => setItemNameInputValue(filterLetters(event.target.value)))}
+                   placeholder="Gegenstandsname..."/>
+
+            <input className="itemQuantity_ListCreator"
+                   value={itemQuantityValue}
+                   onChange={(event => setItemQuantityValue(filterNumbers(event.target.value)))}
+                   placeholder="Anzahl"/>
+            <select className="itemMeasurementType_ListCreator">
+                <option value="Stück" onClick={() => setItemMeasurement("stk.")}>stk.</option>
+                <option value="Pack" onClick={() => setItemMeasurement("pck.")}>pck.</option>
+                <option value="Gramm" onClick={() => setItemMeasurement("g")}>g</option>
+            </select>
+
+            <button className="itemAddButton_ListCreator button_ListCreator"
+                    onClick={addItemClick}>
+                <FontAwesomeIcon icon={faPlus}/>
+            </button>
+
+            <div className="itemMapContainer_ListCreator">
+                {listData[0].items.map((item, index) => (
+                    <div className="itemMapContainerGrid_ListCreator" key={index}>
+                        <input disabled={true} className="itemInputBorderCss_ListCreator" value={updatedItemNameValue}
+                               onChange={(event => setUpdatedItemNameValue(filterLetters(event.target.value)))}
+                               placeholder={item.itemName}/>
+                        <input className="itemQuantityCss_ListCreator" onChange={() => updateItemQuantity()}
+                               value={item.quantity}/>
+                        <select className="itemMeasurementCss_ListCreator"
+                                defaultValue={listData[0].items[index].itemMeasurement}
+                                onChange={(event) => updateItemMeasurement(event.target.value, index)}>
+                            <option value="stk.">stk.</option>
+                            <option value="pck.">pck.</option>
+                            <option value="g">g</option>
+                        </select>
+                        <button className="deleteItemCss_ListCreator button_ListCreator"
+                                onClick={() => deleteItemFromList(index)}>
+                            <FontAwesomeIcon icon={faTrash}/>
+                        </button>
                     </div>
-                ) : (
-                    <input className="listName_ListCreator" autoFocus={true} style={{
-                        textAlign: "left",
-                        cursor: "text"
-                    }} value={newNameInputValue}
-                           onChange={(event => setNewNameInputValue(event.target.value))}
-                           placeholder="Neuer Listen Name..."/>
-                )}
-                    {!changeListNameBool ? (
-                        <button className="button_ListCreator listNameChangeName_ListCreator"
-                                onClick={() => {
-                                    handleToggleChangeListNameBool();
-                                    addNewListIntoListNames(getName());
-                                    setNewNameInputValue("");
-                                }}>
-                            <FontAwesomeIcon icon={faPen}/>
-                        </button>
-                    ) : (
-                        <button className="button_ListCreator listNameChangeName_ListCreator"
-                                onClick={() => {
-                                    handleToggleChangeListNameBool();
-                                    handleListNameChange(newNameInputValue, getName());
-                                }}>
-                            <FontAwesomeIcon icon={faCheck}/>
-                        </button>
-                    )}
-                <input className="newItemInputField_ListCreator"
-                       value={inputValue} onChange={(event => setInputValue(event.target.value))}
-                       placeholder="Gegenstandsname..."/>
-
-                <input className="itemQuantity_ListCreator"
-                       value={quantityValue} onChange={(event => setQuantityValue(event.target.value))}
-                       min={1} max={20}
-                       placeholder={1} type="number"/>
-
-                <select className="itemMeasurementType_ListCreator">
-                    <option value="Stück" onClick={() => setItemMeasurement("stk.")}>stk.</option>
-                    <option value="Pack" onClick={() => setItemMeasurement("pck.")}>pck.</option>
-                    <option value="Gramm" onClick={() => setItemMeasurement("g")}>g</option>
-                </select>
-
-                <button className="itemAddButton_ListCreator button_ListCreator"
-                        onClick={handleAddButtonClick}>
-                    <FontAwesomeIcon icon={faPlus}/>
-                </button>
-
-                <div className="itemMapContainer_ListCreator">
-                    {items.map((item, index) => (
-                        <div className="itemMapContainerGrid_ListCreator" key={index}>
-                            {!(index === indexOfChangeNameBool) ? (
-                                <input className="itemInputBorderCss_ListCreator" value={item.itemName}
-                                       disabled={true}/>
-                            ) : (
-                                <input className="itemInputBorderCss_ListCreator" value={updatedItemNameValue}
-                                       onChange={(event => setUpdatedItemNameValue(event.target.value))}
-                                       placeholder={item.itemName}/>
-                            )}
-                            {!(index === indexOfChangeNameBool) ? (
-                                <button className="button_ListCreator marginCss" onClick={() => disablePens(index)}
-                                        disabled={penIsDisabled(index)}>
-                                    <FontAwesomeIcon icon={faPen}/>
-                                </button>
-                            ) : (
-                                <button className="button_ListCreator marginCss"
-                                        onClick={() => updateItemName(updatedItemNameValue, index)}>
-                                    <FontAwesomeIcon icon={faCheck}/>
-                                </button>
-                            )}
-                            <input className="itemQuantityCss_ListCreator" onChange={() => updateItemQuantity()}
-                                   value={item.quantity} type="number"/>
-                            <select className="itemMeasurementCss_ListCreator">
-                                <option value="Stück" onClick={() => updateItemMeasurement("stk.", index)}
-                                        selected={checkIfSelected("stk.", index)}>stk.
-                                </option>
-                                <option value="Pack" onClick={() => updateItemMeasurement("pck.", index)}
-                                        selected={checkIfSelected("pck.", index)}>pck.
-                                </option>
-                                <option value="Gramm" onClick={() => updateItemMeasurement("g", index)}
-                                        selected={checkIfSelected("g", index)}>g
-                                </option>
-                            </select>
-                            <button className="deleteItemCss_ListCreator button_ListCreator" onClick={() => deleteItemFromList(index)}>
-                                <FontAwesomeIcon icon={faTrash}/>
-                            </button>
-                        </div>
-                    ))}
-                </div>
+                ))}
             </div>
         </div>
+
     )
 }
 

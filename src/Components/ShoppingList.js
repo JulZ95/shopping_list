@@ -6,72 +6,89 @@ import ItemListMap from "./ItemListMap";
 
 const ShoppingList = (props) => {
     //Items Array with Inputvalue for new Items and Total Itemcount
-    const [items, setItems] = useState(
-        JSON.parse(localStorage.getItem(props.name))
-        ||
-        [
-            {itemName: "Erdbeere", quantity: 2, itemMeasurement: "pck.", isSelected: false},
-        ]
-    );
+    // const [items, setItems] = useState(
+    //     JSON.parse(localStorage.getItem(props.name))
+    //     ||
+    //     [
+    //         {itemName: "Erdbeere", quantity: 2, itemMeasurement: "pck.", isSelected: false},
+    //     ]
+    // );
+
+    // console.log("Item Shit");
+    // console.log(props.itemData);
 
     const [finishedItemCount, setFinishedItemCount] = useState(0);
 
     //UseEffect for every Rerender
     useEffect(() => {
         calcFinishedItems();
-        localStorage.setItem(props.name, JSON.stringify(items));
+        // console.log("Recalcing: ShoppingList");
+        // localStorage.setItem(props.name, JSON.stringify(items));
     });
 
-    const toggleComplete = (index) => {
-        const newItems = [...items];
-        newItems[index].isSelected = !newItems[index].isSelected;
-        setItems(newItems);
-    };
+    // useEffect(() => {
+    //     console.log("Should Rerender: ShoppingList");
+    // }, [props.items]);
+
+    // const toggleComplete = (index) => {
+    //     const newItems = [...items];
+    //     newItems[index].isSelected = !newItems[index].isSelected;
+    //     setItems(newItems);
+    // };
 
     const calcFinishedItems = () => {
         let itemsFinished = 0;
-        for (let i = 0; i < items.length; i++) {
-            if(items[i].isSelected) {
-                itemsFinished++;
+        if(props.items !== null) {
+            for (let i = 0; i < props.items.length; i++) {
+                if (props.items[i].isSelected) {
+                    itemsFinished++;
+                }
             }
+            setFinishedItemCount(itemsFinished);
         }
-        setFinishedItemCount(itemsFinished);
     }
 
     return (
-        <div className="listContainer">
-            <span className="listHeaderTitle">{props.name}</span>
+        <div>
+            {props.items !== null ? (
+                <div className="listContainer">
+                    <span className="listHeaderTitle">{props.listName}</span>
 
-            <button className="button_ShoppingList editListButton_ShoppingList"
-                    onClick={() => {
-                props.handleOpenListCreator(props.name);
-            }}>
-                <FontAwesomeIcon icon={faPen}/>
-            </button>
+                    <button className="button_ShoppingList editListButton_ShoppingList"
+                            onClick={() => {
+                                props.handleOpenListCreator(props.listName);
+                            }}>
+                        <FontAwesomeIcon icon={faPen}/>
+                    </button>
 
-            <button className="button_ShoppingList deleteListButton_ShoppingList" onClick={() => {
-                // eslint-disable-next-line no-restricted-globals
-                let bool = confirm("Liste Wirklich Löschen?");
+                    <button className="button_ShoppingList deleteListButton_ShoppingList" onClick={() => {
+                        props.deleteFunction(props.listIndex, props.listName);
+                    }}>
+                        <FontAwesomeIcon icon={faTrash}/>
+                    </button>
 
-                if(bool) {
-                    props.deleteFunction(props.index, props.name);
-                }
-            }}>
-                <FontAwesomeIcon icon={faTrash}/>
-            </button>
+                    <div className="divider1"/>
 
-            <div className="divider1"/>
+                    <ItemListMap toggleComplete={props.toggleComplete} items={props.items}
+                                 listIndex={props.listIndex}/>
 
-            <ItemListMap name={props.name} toggleComplete={toggleComplete} items={items}/>
+                    <div className="divider2"/>
 
-            <div className="divider2"/>
-
-            <label className="listTotalQuantity">
-                Fortschritt: {finishedItemCount} / {items.length}
-            </label>
-            <div className="progressBar_ShoppingList">
-                <progress value={(100 / items.length) * finishedItemCount} max="100"/>
-            </div>
+                    <label className="listTotalQuantity">
+                        Fortschritt: {finishedItemCount} / {props.items.length}
+                    </label>
+                    {props.items.length > 0 ? (
+                        <div className="progressBar_ShoppingList">
+                            <progress value={(100 / props.items.length) * finishedItemCount}
+                                      max="100"/>
+                        </div>
+                    ) : (
+                        <div className="progressBar_ShoppingList"/>
+                    )}
+                </div>
+            ) : (
+                <span>Wuff</span>
+            )}
         </div>
     )
 }

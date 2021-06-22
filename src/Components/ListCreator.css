@@ -48,10 +48,10 @@
 /*    box-sizing: border-box;*/
 /*}*/
 
-.listNameChangeName_ListCreator {
-    grid-row: 1;
-    grid-column: 4 / span 1;
-}
+/*.listNameChangeName_ListCreator {*/
+/*    grid-row: 1;*/
+/*    grid-column: 4 / span 1;*/
+/*}*/
 
 .newItemInputField_ListCreator {
     grid-row: 2;
@@ -124,17 +124,24 @@
     margin-top: 5px;
 }
 
-/*.saveButton_ListCreator {*/
-/*    grid-row: 4;*/
-/*    grid-column: 4 / span 1;*/
-/*}*/
+
+.checkListNameIcon_ListCreator {
+    grid-row: 1;
+    grid-column: 4 / span 1;
+    margin-left: -120%;
+}
+
+.saveButton_ListCreator {
+    grid-row: 1;
+    grid-column: 4 / span 1;
+}
 
 .button_ListCreator {
     height: 25px;
     width: 25px;
     cursor: pointer;
 
-    color: #80735b;
+    color: white;
     transition-duration: 0.4s;
 
     background-color: transparent;
@@ -143,7 +150,7 @@
 }
 
 .button_ListCreator:hover {
-    background-color: lightgrey;
+    background-color: #722040;
     border: 1px none #5c5853;
 }
 
