@@ -1,0 +1,4 @@
+.mainContainer_SubscribeList {
+    display: flex;
+    flex-wrap: nowrap;
+}

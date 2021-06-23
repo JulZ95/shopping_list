@@ -12,7 +12,7 @@
     border: solid 4px #d3394c;
     background-color: #e85668;
     border-radius: 4px;
-    margin: 0 5px 0 5px;
+    margin: 0 5px 5px 5px;
     width: 200px;
 }
 
@@ -45,7 +45,6 @@
     background-color: transparent;
     border: 1px none lightgrey;
     border-radius: 4px;
-    /*width: 15%;*/
 }
 
 .deleteUser_homeUsers:hover {

@@ -3,11 +3,20 @@ import React, {useEffect, useState} from "react";
 import {HashRouter, NavLink, Route, useHistory} from "react-router-dom";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {AppBar, makeStyles, Toolbar, Typography} from "@material-ui/core";
-import {faDownload, faHammer, faHome, faList, faPlus, faSyncAlt, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {
+    faClipboardList,
+    faDownload,
+    faHammer,
+    faHome,
+    faList,
+    faPlus,
+    faSyncAlt
+} from "@fortawesome/free-solid-svg-icons";
 import ShoppingList from "./Components/ShoppingList";
 import ListCreator from "./Components/ListCreator";
 import {saveAs} from "file-saver";
 import HomeUsers from "./Components/homeUsers";
+import SubscribeList from "./Components/SubscribeList";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -31,11 +40,12 @@ const App = () => {
 
     const [userIDs, setUserIDs] = useState(() => {
         const tmpUserIDs = JSON.parse(localStorage.getItem("userIDs"));
-        if (tmpUserIDs === undefined) {
+        if (tmpUserIDs === null) {
             return [
                 {
                     userID: 1,
-                    userName: "Julian"
+                    userName: "Julian",
+                    subscribedLists: []
                 }
             ]
         } else {
@@ -43,11 +53,8 @@ const App = () => {
         }
     })
 
-    // const [userCount, setUserCount] = useState(0);
-
     useEffect(() => {
         localStorage.setItem("userIDs", JSON.stringify(userIDs));
-        // setUserCount(userIDs.length);
     }, [userIDs]);
 
     const addNewUser = (userName) => {
@@ -58,17 +65,43 @@ const App = () => {
             }
             const newUserObj = {
                 userID: newID,
-                userName: userName
+                userName: userName,
+                subscribedLists: []
             }
             const newUserIDs = [...userIDs, newUserObj];
-            setUserIDs(newUserIDs);
+            setUserIDs(newUserIDs.sort((a, b) => {
+                return a.userID - b.userID;
+            }));
+            localStorage.setItem(newID, JSON.stringify([{
+                userName: userName,
+                lists: [
+                    {
+                        listName: "Default Liste 1",
+                        items: []
+                    }
+                ]
+            }]))
         }
     }
 
     const deleteUser = (id) => {
         const newUserIDs = [...userIDs];
         newUserIDs.splice(newUserIDs.findIndex(element => element.userID === id), 1);
-        setUserIDs(newUserIDs);
+        // console.log(removeSubbedUserLists(newUserIDs, id));
+        setUserIDs(removeSubbedUserLists(newUserIDs, id));
+        localStorage.removeItem(id);
+    }
+
+    const removeSubbedUserLists = (newUsersIDs, id) => {
+        const tmpArray = [...newUsersIDs];
+        // console.log(tmpArray);
+
+        for (const newUsersIDElement of tmpArray) {
+            newUsersIDElement.subscribedLists = newUsersIDElement.subscribedLists.filter(element => {
+                return element.subscribedUser !== id;
+            })
+        }
+        return tmpArray;
     }
 
     const searchFreeID = (newID) => {
@@ -80,15 +113,13 @@ const App = () => {
         setActiveUser(userID);
     }
 
-    console.log(activeUser);
-
     return (
         <HashRouter>
             <div className={classes.root}>
                 <AppBar position="static" className={classes.appBar}>
                     <Toolbar>
                         <Typography className={classes.title} varaint={"h2"} style={{cursor: "default"}}>
-                            <span>Einkaufsliste für </span>
+                            <span>Einkaufslisten für </span>
                             <a id="linkToUnsere-Kochrezepte" href="https://unsere-kochrezepte.de/#/">
                                 <i>Unsere Kochrezepte</i>
                             </a>
@@ -100,10 +131,14 @@ const App = () => {
                         <NavLink id="listViewLink" className={classes.menuButton} to={"/listView/" + activeUser}>
                             <FontAwesomeIcon icon={faList}/>
                         </NavLink>
-                        <NavLink id="newListLink" className={classes.menuButton}
-                                 to={"/listCreator/" + activeUser + "/Neue+Liste"}>
-                            <FontAwesomeIcon id="createNewList" icon={faHammer}/>
+                        <NavLink id="subscribeToList" className={classes.menuButton}
+                                 to={"/subscribeListView/" + activeUser}>
+                            <FontAwesomeIcon icon={faClipboardList}/>
                         </NavLink>
+                        {/*<NavLink id="newListLink" className={classes.menuButton}*/}
+                        {/*         to={"/listCreator/" + activeUser + "/Neue+Liste"}>*/}
+                        {/*    <FontAwesomeIcon id="createNewList" icon={faHammer}/>*/}
+                        {/*</NavLink>*/}
                     </Toolbar>
                 </AppBar>
             </div>
@@ -111,39 +146,41 @@ const App = () => {
                 height: "100vh",
                 background: "linear-gradient(180deg, rgba(162,162,162,1) 0%, rgba(175,150,134,1) 60%, rgba(211,57,76,1) 100%)",
             }}>
-                {/*<Route path="/"/>*/}
                 <Route exact path="/" render={(props) => (
                     <HomeView {...props} userIDs={userIDs} setUserIDs={setUserIDs}
                               activeUser={activeUser} addNewUser={addNewUser} deleteUser={deleteUser}
                               selectActiveUser={selectActiveUser}/>
                 )}/>
                 <Route path="/listView/:userID" render={(props) => (
-                    <ShoppingLists {...props} userID={activeUser} userIDs={userIDs}/>
+                    <ListView {...props} userID={activeUser} userIDs={userIDs}/>
                 )}/>
                 <Route path="/listCreator/:userID/:listName" render={(props) => (
                     <ListCreatorView {...props} userID={activeUser}/>
+                )}/>
+                <Route path="/subscribeListView/:userID" render={(props) => (
+                    <SubscribeListView {...props} activeUser={activeUser} userIDs={userIDs} setUserIDs={setUserIDs}/>
                 )}/>
             </div>
         </HashRouter>
     );
 }
 
-const ShoppingLists = (props) => {
+const ListView = (props) => {
     const [listData, setListData] = useState(() => {
         const tmpListData = JSON.parse(localStorage.getItem(props.userID))
         if (tmpListData !== null) {
             return tmpListData;
         }
         return [
-            {
-                userName: props.userIDs[props.userIDs.findIndex(element => element.userID === props.userID)].userName,
-                lists: [
-                    {
-                        listName: "Default Liste 1",
-                        items: []
-                    }
-                ]
-            }
+            // {
+            //     userName: props.userIDs[props.userIDs.findIndex(element => element.userID === props.userID)].userName,
+            //     lists: [
+            //         {
+            //             listName: "Default Liste 1",
+            //             items: []
+            //         }
+            //     ]
+            // }
         ]
     });
 
@@ -171,102 +208,6 @@ const ShoppingLists = (props) => {
         history.push("/listCreator/" + props.userID + "/" + listName.replaceAll(" ", "+"));
     }
 
-    // const [listNames, setListNames] = useState(() => {
-    //     // const tmpListNames = initialListNameState;
-    //     // if(tmpListNames !== null) {
-    //     //     console.log("Loaded Storage");
-    //     //     return tmpListNames;
-    //     // } else {
-    //     //     console.log("Storage Empty");
-    //     //     return [{listName: "Standart Liste"},]
-    //     // }
-    //     return 0;
-    // });
-    // const [itemArray, setItemArray] = useState(() => {
-    //     // let tmpListNames = initialListNameState;
-    //     // if(tmpListNames === null) {
-    //     //     tmpListNames = [
-    //     //         {listName: "Standart Liste"},
-    //     //     ]
-    //     // } else {
-    //     //     console.log("ListNames are Not null");
-    //     // }
-    //     // let allItemsData = [];
-    //     // for (const name of tmpListNames) {
-    //     //     if(JSON.parse(localStorage.getItem(name.listName)) !== null) {
-    //     //         console.log("Loaded Item");
-    //     //         allItemsData = [...allItemsData, JSON.parse(localStorage.getItem(name.listName))];
-    //     //     } else {
-    //     //         console.log("ListItems are Null!")
-    //     //         allItemsData = [...allItemsData, [{
-    //     //             itemName: "Erdbeere", quantity: 2, itemMeasurement: "pck.", isSelected: false,
-    //     //         }]]
-    //     //     }
-    //     // }
-    //     // return allItemsData;
-    //     return 0;
-    // });
-
-    // useEffect(() => {
-    //     const tmpListNames = JSON.parse(localStorage.getItem("ListNames"));
-    //     setListNames(tmpListNames);
-    // }, [])
-
-    // useEffect(() => {
-    //     // localStorage.setItem("ListNames", JSON.stringify(listNames));
-    //     // console.log(listNames);
-    //     // console.log("Updated ListNames");
-    //
-    //     // for (const listName of listNames) {
-    //     //     console.log(listName.listName);
-    //     //     let allItemsData = [];
-    //     //     for (const name of listNames) {
-    //     //         allItemsData = [...allItemsData, JSON.parse(localStorage.getItem(name.listName))];
-    //     //         console.log(allItemsData);
-    //     //     }
-    //     // }
-    //
-    //     // setItemArray(() => {
-    //     //     let allItemsData = [];
-    //     //     for (const name of listNames) {
-    //     //         allItemsData = [...allItemsData, JSON.parse(localStorage.getItem(name.listName))];
-    //     //         // console.log(allItemsData);
-    //     //     }
-    //     //     return allItemsData;
-    //     // })
-    //
-    // }, [listNames]);
-
-    // useEffect(() => {
-    //     // const tmpListNames = JSON.parse(localStorage.getItem("ListNames"));
-    //     // console.log("Attempt to update itemArray");
-    //     // let index = 0;
-    //     // for (const tmpElement of itemArray) {
-    //     //     if(tmpElement !== null) {
-    //     //         console.log("itemArray is Not Null");
-    //     //         localStorage.setItem(tmpListNames[index].listName, JSON.stringify(tmpElement));
-    //     //     } else {
-    //     //         console.log("itemArray is Null");
-    //     //         localStorage.setItem(tmpListNames[index].listName, JSON.stringify([{
-    //     //             itemName: "Erdbeere", quantity: 2, itemMeasurement: "pck.", isSelected: false,
-    //     //         }]));
-    //     //     }
-    //     //     index++
-    //     // }
-    // }, [itemArray])
-
-
-    // const getAllItems = () => {
-    //     let items = "";
-    //     const listNames = JSON.parse(localStorage.getItem("ListNames"));
-    //     for (let i = 0; i < listNames.length; i++) {
-    //         items = [...items, JSON.parse(localStorage.getItem(listNames[i].listName))]
-    //     }
-    //     return [listNames, items];
-    // }
-
-    // const [dataJSON, setDataJSON] = useState([]);
-
     const readJSONFromInput = (event) => {
         let reader = new FileReader();
         reader.onload = onReaderLoad;
@@ -286,11 +227,6 @@ const ShoppingLists = (props) => {
             console.log(e);
         }
     }
-
-    // useEffect(() => {
-    //     console.log("Updated JSON Upload Variable");
-    //     console.log(dataJSON);
-    // }, [dataJSON]);
 
     const validateJSONUpload = (obj) => {
         const Ajv = require("ajv");
@@ -441,13 +377,28 @@ const HomeView = (props) => {
                 <div>
                     <input value={newUserInputField} onChange={event => setNewUserInputField(event.target.value)}
                            placeholder="Neuer User..."/>
-                    <button onClick={() => props.addNewUser(newUserInputField)}>
+                    <button onClick={() => {
+                        props.addNewUser(newUserInputField);
+                        setNewUserInputField("");
+                    }}>
                         <FontAwesomeIcon icon={faPlus}/>
                     </button>
                 </div>
             </div>
             <div className="main">
-               <HomeUsers {...props}/>
+                <HomeUsers {...props}/>
+            </div>
+        </div>
+    )
+}
+
+const SubscribeListView = (props) => {
+    return (
+        <div className="mainContainer">
+            <div className="main">
+                {props.userIDs.filter(element => element.userID !== props.activeUser).map((element, index) => (
+                    <SubscribeList {...props} element={element} key={index}/>
+                ))}
             </div>
         </div>
     )
@@ -457,14 +408,6 @@ const ListCreatorView = (props) => {
     const checkListName = (listName) => {
         return "Neue Liste" === listName;
     }
-
-    // useEffect(() => {
-    //     let value = JSON.parse(localStorage.getItem("ListNames"));
-    //     const newEntry = {listName: "Neue Liste"};
-    //     value = [...value, newEntry];
-    //     localStorage.setItem("ListNames", JSON.stringify(value));
-    // })
-
     return (
         <div className="mainContainer">
             <div className="main">
