@@ -1,4 +1,47 @@
 .mainContainer_SubscribeList {
+    font-family: Roboto, sans-serif;
+    border: solid 4px  #722040;
+    border-radius: 4px;
+    margin: 5px;
+    padding: 2px 5px 5px 5px;
+    width: 150px;
+    text-align: center;
+    background-color: #e85668;
+}
+
+.subscribeListTitle_SubscribeList {
+    font-family: "Verdana", serif;
+    font-size: 12px;
+    color: #722040;
+    font-weight: bold;
+
+    border-radius: 4px;
+    background-color: white;
+    margin: 2px 5px;
+    padding: 4px 0;
+    display: block;
+}
+
+.divider_SubscribeList {
+    border: 2px solid white;
+    border-radius: 4px;
+    margin: 6px 0 4px 0;
+}
+
+.subscribeListItems_SubscribeList {
     display: flex;
-    flex-wrap: nowrap;
+    text-align: left;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 510;
+}
+
+.subscribeListItemsLabel_SubscribeList {
+    width: 130px;
+}
+
+.checkListSub_SubscribeList {
+    float: right;
+    margin-top: 3px;
 }

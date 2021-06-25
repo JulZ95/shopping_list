@@ -130,20 +130,18 @@ const App = () => {
                         </NavLink>
                         <NavLink id="listViewLink" className={classes.menuButton} to={"/listView/" + activeUser}>
                             <FontAwesomeIcon icon={faList}/>
+                            <span className="toolTipText" style={{}}>Listen</span>
                         </NavLink>
-                        <NavLink id="subscribeToList" className={classes.menuButton}
+                        <NavLink id="subscribeToList" style={{width: "15px", textAlign: "center"}} className={classes.menuButton}
                                  to={"/subscribeListView/" + activeUser}>
                             <FontAwesomeIcon icon={faClipboardList}/>
+                            <span className="toolTipText" style={{}}>Abo</span>
                         </NavLink>
-                        {/*<NavLink id="newListLink" className={classes.menuButton}*/}
-                        {/*         to={"/listCreator/" + activeUser + "/Neue+Liste"}>*/}
-                        {/*    <FontAwesomeIcon id="createNewList" icon={faHammer}/>*/}
-                        {/*</NavLink>*/}
                     </Toolbar>
                 </AppBar>
             </div>
             <div className="routes" style={{
-                height: "100vh",
+                height: "100%",
                 background: "linear-gradient(180deg, rgba(162,162,162,1) 0%, rgba(175,150,134,1) 60%, rgba(211,57,76,1) 100%)",
             }}>
                 <Route exact path="/" render={(props) => (
@@ -172,17 +170,49 @@ const ListView = (props) => {
             return tmpListData;
         }
         return [
-            // {
-            //     userName: props.userIDs[props.userIDs.findIndex(element => element.userID === props.userID)].userName,
-            //     lists: [
-            //         {
-            //             listName: "Default Liste 1",
-            //             items: []
-            //         }
-            //     ]
-            // }
+            {
+                userName: props.userIDs[props.userIDs.findIndex(element => element.userID === props.userID)].userName,
+                lists: [
+                ]
+            }
         ]
     });
+
+    const userIDArray = [];
+    const initializeSubscribedLists = () => {
+        const tmpArray = [...props.userIDs[props.userIDs.findIndex(element => element.userID === props.userID)].subscribedLists];
+        const tmpArray2 = [];
+        for (const tmpArrayElement of tmpArray) {
+            if(tmpArrayElement.subscribedUserLists.length > 0) {
+                const tmpJSONData = JSON.parse(localStorage.getItem(tmpArrayElement.subscribedUser));
+                for (const tmpArrayElementElement of tmpArrayElement.subscribedUserLists) {
+                    userIDArray[userIDArray.length] = tmpArrayElement.subscribedUser;
+                    tmpArray2.push(tmpJSONData[0].lists[tmpJSONData[0].lists.findIndex(element => element.listName === tmpArrayElementElement.subscribedListName)])
+                }
+            }
+        }
+        return tmpArray2;
+    }
+
+    const [subscribedLists, setSubscribedLists] = useState(initializeSubscribedLists());
+    const toggleSubbedListItem = (listIndex, itemIndex, subbedUserID) => {
+        const tmpData = [...subscribedLists];
+        tmpData[listIndex].items[itemIndex].isSelected = !tmpData[listIndex].items[itemIndex].isSelected;
+        setSubscribedLists(tmpData);
+
+        if(subbedUserID !== 0) {
+            const tmpArrayData = [...(JSON.parse(localStorage.getItem(subbedUserID + "")))];
+            for (const tmpDataElement of tmpArrayData[0].lists) {
+                if(tmpDataElement.listName === subscribedLists[listIndex].listName) {
+                    tmpDataElement.items = subscribedLists[listIndex].items;
+                    localStorage.setItem(subbedUserID, JSON.stringify(tmpArrayData));
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+    }, [subscribedLists])
 
     useEffect(() => {
         localStorage.setItem(props.userID, JSON.stringify(listData));
@@ -215,13 +245,11 @@ const ListView = (props) => {
     }
 
     const onReaderLoad = (event) => {
-        // console.log(event.target.result);
         try {
             const obj = JSON.parse(event.target.result);
             if (validateJSONUpload(obj)) {
                 updateListData(obj);
             }
-            // console.log(obj);
         } catch (e) {
             console.log("The data needs to have one array that contains one and only one JSON Object in it! -> Check your loaded data it seems to be malformed :^)");
             console.log(e);
@@ -334,7 +362,7 @@ const ListView = (props) => {
                     saveAs(blob, "User_" + props.userID + "=lists.json");
                 }}>
                     <FontAwesomeIcon icon={faDownload}/>
-                    <span> Listen Downloaden</span>
+                    <span> Downloaden</span>
                 </label>
                 <input name="fileInput" id="file-1" className="fileUploadInput" onChange={(event) => {
                     console.log("Trying to Upload and Synchronize Lists");
@@ -343,7 +371,7 @@ const ListView = (props) => {
                 />
                 <label className="fileUploadLabel" htmlFor="file-1">
                     <FontAwesomeIcon id="syncIcon" icon={faSyncAlt}/>
-                    <span> Listen Synchronisieren</span>
+                    <span> Listen Sync.</span>
                 </label>
                 <label className="newListLabel" onClick={() => handleOpenListCreator("Neue Liste")}>
                     <FontAwesomeIcon id="hammerIcon" icon={faHammer}/>
@@ -353,15 +381,28 @@ const ListView = (props) => {
 
             <div className="main">
                 {listData[0].lists.map((list, listIndex) => (
-                    <div key={listIndex} className="shopping-lists-container">
-                        <ShoppingList listName={list.listName}
-                                      items={list.items}
-                                      deleteFunction={handleDeleteList}
-                                      handleOpenListCreator={handleOpenListCreator}
-                                      listIndex={listIndex}
-                                      toggleComplete={toggleComplete}
+                    <div key={listIndex}>
+                        <ShoppingList listName={list.listName} items={list.items}
+                                      deleteFunction={handleDeleteList} handleOpenListCreator={handleOpenListCreator}
+                                      listIndex={listIndex} toggleComplete={toggleComplete} subscribedList={false}
+                                      subscribedUserID={null} toggleSubbedListItem={null}
                         />
                     </div>
+                ))}
+                <div style={{width: "100%"}}/>
+                <div style={{width: "100%", border: "solid 4px white", borderRadius: "4px"}}/>
+                {subscribedLists.map((list, listIndex) => (
+                    list !== undefined ? (
+                        <div key={listIndex}>
+                            <ShoppingList listName={list.listName} items={list.items}
+                                          deleteFunction={handleDeleteList} handleOpenListCreator={handleOpenListCreator}
+                                          listIndex={listIndex} toggleComplete={toggleComplete} subscribedList={true}
+                                          subscribedUserID={userIDArray[listIndex]} toggleSubbedListItem={toggleSubbedListItem}
+                            />
+                        </div>
+                        ) : (
+                            <div key={listIndex}/>
+                        )
                 ))}
             </div>
         </div>
@@ -374,10 +415,10 @@ const HomeView = (props) => {
     return (
         <div className="mainContainer">
             <div className="nav">
-                <div>
+                <div className="newUserAddField">
                     <input value={newUserInputField} onChange={event => setNewUserInputField(event.target.value)}
                            placeholder="Neuer User..."/>
-                    <button onClick={() => {
+                    <button className="newUserAddButton" onClick={() => {
                         props.addNewUser(newUserInputField);
                         setNewUserInputField("");
                     }}>
@@ -396,6 +437,9 @@ const SubscribeListView = (props) => {
     return (
         <div className="mainContainer">
             <div className="main">
+                <div style={{width: "100%", margin: "5px 0 10px 0", display: "flex", justifyContent: "center", fontWeight: "520"}}>
+                    <label className="userGreeting">Willkommen: {props.userIDs[props.userIDs.findIndex(element => element.userID === props.activeUser)].userName}</label>
+                </div>
                 {props.userIDs.filter(element => element.userID !== props.activeUser).map((element, index) => (
                     <SubscribeList {...props} element={element} key={index}/>
                 ))}

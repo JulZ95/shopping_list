@@ -1,6 +1,7 @@
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheckSquare, faSquare} from "@fortawesome/free-solid-svg-icons";
 import React from "react";
+import "./SubscribeList.css";
 
 const SubscribeList = (props) => {
     const subscribeList = (subscribedUserID, listName) => {
@@ -43,17 +44,18 @@ const SubscribeList = (props) => {
     }
 
     return (
-        <div>
-            <label>{props.element.userName}</label>
+        <div className="mainContainer_SubscribeList">
+            <label className="subscribeListTitle_SubscribeList">{props.element.userName}</label>
+            <div className="divider_SubscribeList"/>
             {(JSON.parse(localStorage.getItem(props.element.userID)))[0].lists.map((nestedElement, nestedIndex) => (
-                <div key={nestedIndex}>
-                    <label>{nestedElement.listName} </label>
+                <div className="subscribeListItems_SubscribeList" key={nestedIndex}>
+                    <label className="subscribeListItemsLabel_SubscribeList">{nestedElement.listName} </label>
                     {isSubscribed(props.element.userID, nestedElement.listName) ? (
-                        <FontAwesomeIcon style={{cursor: "pointer"}}
+                        <FontAwesomeIcon className="checkListSub_SubscribeList" style={{cursor: "pointer"}}
                                          onClick={() => unSubscribeList(props.element.userID, nestedElement.listName)}
                                          icon={faCheckSquare}/>
                     ) : (
-                        <FontAwesomeIcon style={{cursor: "pointer"}}
+                        <FontAwesomeIcon className="checkListSub_SubscribeList" style={{cursor: "pointer"}}
                                          onClick={() => subscribeList(props.element.userID, nestedElement.listName)}
                                          icon={faSquare}/>
                     )}

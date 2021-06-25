@@ -5,36 +5,12 @@ import {faPen, faTrash} from "@fortawesome/free-solid-svg-icons";
 import ItemListMap from "./ItemListMap";
 
 const ShoppingList = (props) => {
-    //Items Array with Inputvalue for new Items and Total Itemcount
-    // const [items, setItems] = useState(
-    //     JSON.parse(localStorage.getItem(props.name))
-    //     ||
-    //     [
-    //         {itemName: "Erdbeere", quantity: 2, itemMeasurement: "pck.", isSelected: false},
-    //     ]
-    // );
-
-    // console.log("Item Shit");
-    // console.log(props.itemData);
-
     const [finishedItemCount, setFinishedItemCount] = useState(0);
 
     //UseEffect for every Rerender
     useEffect(() => {
         calcFinishedItems();
-        // console.log("Recalcing: ShoppingList");
-        // localStorage.setItem(props.name, JSON.stringify(items));
     });
-
-    // useEffect(() => {
-    //     console.log("Should Rerender: ShoppingList");
-    // }, [props.items]);
-
-    // const toggleComplete = (index) => {
-    //     const newItems = [...items];
-    //     newItems[index].isSelected = !newItems[index].isSelected;
-    //     setItems(newItems);
-    // };
 
     const calcFinishedItems = () => {
         let itemsFinished = 0;
@@ -51,30 +27,31 @@ const ShoppingList = (props) => {
     return (
         <div>
             {props.items !== null ? (
-                <div className="listContainer">
-                    <span className="listHeaderTitle">{props.listName}</span>
-
-                    <button className="button_ShoppingList editListButton_ShoppingList"
-                            onClick={() => {
+                <div className="listContainer_ShoppingList">
+                    <span className="listHeaderTitle_ShoppingList">{props.listName}</span>
+                    <button className="button_ShoppingList editListButton_ShoppingList" disabled={props.subscribedList}
+                            style={props.subscribedList ? {pointerEvents: "none", color: "gray"} : {}} onClick={() => {
                                 props.handleOpenListCreator(props.listName);
                             }}>
                         <FontAwesomeIcon icon={faPen}/>
                     </button>
 
-                    <button className="button_ShoppingList deleteListButton_ShoppingList" onClick={() => {
+                    <button className="button_ShoppingList deleteListButton_ShoppingList" disabled={props.subscribedList}
+                            style={props.subscribedList ? {pointerEvents: "none", color: "gray"} : {}} onClick={() => {
                         props.deleteFunction(props.listIndex, props.listName);
                     }}>
                         <FontAwesomeIcon icon={faTrash}/>
                     </button>
 
-                    <div className="divider1"/>
+                    <div className="divider1_ShoppingList"/>
 
                     <ItemListMap toggleComplete={props.toggleComplete} items={props.items}
-                                 listIndex={props.listIndex}/>
+                                 listIndex={props.listIndex} subscribedUserID={props.subscribedUserID}
+                                 toggleSubbedListItem={props.toggleSubbedListItem}/>
 
-                    <div className="divider2"/>
+                    <div className="divider2_ShoppingList"/>
 
-                    <label className="listTotalQuantity">
+                    <label className="listTotalQuantity_ShoppingList">
                         Fortschritt: {finishedItemCount} / {props.items.length}
                     </label>
                     {props.items.length > 0 ? (
@@ -85,9 +62,10 @@ const ShoppingList = (props) => {
                     ) : (
                         <div className="progressBar_ShoppingList"/>
                     )}
+                    <span>{props.subscribedUserID !== null ? "ID: " + props.subscribedUserID : ""}</span>
                 </div>
             ) : (
-                <span>Wuff</span>
+                <span/>
             )}
         </div>
     )

@@ -1,42 +1,3 @@
-/*.App {*/
-/*  text-align: center;*/
-/*}*/
-
-/*.App-logo {*/
-/*  height: 40vmin;*/
-/*  pointer-events: none;*/
-/*}*/
-
-/*@media (prefers-reduced-motion: no-preference) {*/
-/*  .App-logo {*/
-/*    animation: App-logo-spin infinite 20s linear;*/
-/*  }*/
-/*}*/
-
-/*.App-header {*/
-/*  background-color: #282c34;*/
-/*  min-height: 100vh;*/
-/*  display: flex;*/
-/*  flex-direction: column;*/
-/*  align-items: center;*/
-/*  justify-content: center;*/
-/*  font-size: calc(10px + 2vmin);*/
-/*  color: white;*/
-/*}*/
-
-/*.App-link {*/
-/*  color: #61dafb;*/
-/*}*/
-
-/*@keyframes App-logo-spin {*/
-/*  from {*/
-/*    transform: rotate(0deg);*/
-/*  }*/
-/*  to {*/
-/*    transform: rotate(360deg);*/
-/*  }*/
-/*}*/
-
 .fontAwesomeIcon {
   margin-left: 5px;
   margin-right: 5px;
@@ -51,37 +12,37 @@
   text-decoration: underline;
 }
 
-#homeLink, #listViewLink, #newListLink {
+#homeLink, #listViewLink, #newListLink, #subscribeToList {
   border-radius: 4px;
   transition-duration: 0.4s;
 }
 
-#homeLink .toolTipText, #listViewLink .toolTipText, #newListLink .toolTipText{
+#homeLink .toolTipText, #listViewLink .toolTipText, #subscribeToList .toolTipText{
   visibility: hidden;
-  width: 80px;
+  width: 60px;
   background-color: gray;
   color: #fff;
   text-align: center;
   border-radius: 6px;
-  /*padding: 5px 0;*/
+  font-size: 12px;
   padding: 1px;
+  margin-top: 30px;
 
-  /* Position the tooltip */
   position: absolute;
   z-index: 1;
-  /*top: 100%;*/
-  /*left: 50%;*/
-  margin-left: -40px;
+  top: 30%;
+  /*left: 80%;*/
+  margin-left: -37px;
 
   opacity: 0;
   transition: opacity 0.4s;
 }
 
-#homeLink:hover, #listViewLink:hover, #newListLink:hover{
+#homeLink:hover, #listViewLink:hover, #newListLink:hover, #subscribeToList:hover{
   background-color: #722040;
 }
 
-#homeLink:hover .toolTipText, #listViewLink:hover .toolTipText, #newListLink:hover .toolTipText {
+#homeLink:hover .toolTipText, #listViewLink:hover .toolTipText, #subscribeToList:hover .toolTipText {
   visibility: visible;
   opacity: 1;
 }
@@ -167,7 +128,9 @@
 
   border-radius: 4px;
 
+  margin-left: -10px;
   margin-right: 5px;
+  /*margin: 0 5px;*/
 }
 
 .fileDownload:hover {
@@ -235,6 +198,33 @@
   transition-duration: 0s;
   transform-origin: 10% 90%;
   animation: rotation 1s infinite linear;
+}
+
+.newUserAddField {
+  border: solid 4px #d3394c;
+  border-radius: 4px;
+  padding: 5px;
+  background-color: #e85668;
+}
+
+.newUserAddButton {
+  height: 25px;
+  width: 25px;
+  cursor: pointer;
+
+  color: white;
+  transition-duration: 0.4s;
+
+  background-color: transparent;
+  border: 1px none lightgrey;
+  border-radius: 4px;
+
+  margin-left: 5px;
+}
+
+.newUserAddButton:hover {
+  background-color: #722040;
+  border: 1px none #5c5853;
 }
 
 .buttonContainer {

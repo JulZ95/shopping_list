@@ -1,4 +1,4 @@
-.listItems {
+.listItems_ItemListMap {
     grid-column: 1 / span 4;
     grid-row: 3;
 
@@ -13,22 +13,20 @@
     margin: 4px;
 }
 
-.itemContainer {
+.itemContainer_ItemListMap {
     grid-row: 1;
     grid-column: 1 / span 2;
 
     width: 10em;
 }
 
-.listItemQuantity {
+.listItemQuantity_ItemListMap {
     grid-row: 1;
     grid-column: 3 / span 2;
 }
 
-.listItemButton {
+.listItemButton_ItemListMap {
     color: white;
-
-    /*transition-duration: 0.4s;*/
     cursor: pointer;
 
     background-color: transparent;
@@ -37,7 +35,7 @@
     border-radius: 4px;
 }
 
-.completedItem {
+.completedItem_ItemListMap {
     text-decoration: line-through;
 }
 

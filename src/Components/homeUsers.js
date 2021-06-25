@@ -6,9 +6,7 @@ import "./homeUsers.css";
 const HomeUsers = (props) => {
     return (
         <div className="mainContainer_homeUsers">
-            {props.userIDs.sort((a, b) => {
-                return a.userID - b.userID;
-            }).map((userIDElement, keyIndex) => (
+            {props.userIDs.map((userIDElement, keyIndex) => (
                 <div className="userField_homeUsers" key={keyIndex}>
                     {props.activeUser === userIDElement.userID ? (
                         <div className="userInfo_homeUsers" style={{

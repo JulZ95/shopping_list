@@ -4,12 +4,13 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faPlus, faSave, faTimes, faTrash} from "@fortawesome/free-solid-svg-icons";
 import {useHistory, useParams} from "react-router-dom";
 
-const ListCreator = (props) => {
+const ListCreator = () => {
     const {userID, listName} = useParams();
     const history = useHistory();
     const getName = () => {
         return listName.replaceAll("+", " ");
     }
+
     const existingListIndex = JSON.parse(localStorage.getItem(userID))[0].lists.findIndex(element => element.listName === getName());
 
     if (userID === undefined || parseInt(userID) < 1 || isNaN(parseInt(userID)) || listName === undefined || typeof listName !== "string"
@@ -55,7 +56,6 @@ const ListCreator = (props) => {
                 itemMeasurement: itemMeasurement,
                 isSelected: false,
             }
-
             const newItems = [...listData];
             newItems[0].items.push(newItem);
             setListData(newItems);
@@ -65,9 +65,7 @@ const ListCreator = (props) => {
     };
 
     const [updatedItemNameValue, setUpdatedItemNameValue] = useState("");
-
     const [newNameInputValue, setNewNameInputValue] = useState("");
-
     const [itemNameInputValue, setItemNameInputValue] = useState("");
 
     const [itemQuantityValue, setItemQuantityValue] = useState(1);
@@ -103,12 +101,6 @@ const ListCreator = (props) => {
             setListData(newListData);
             setValidListNameBool(true);
         }
-        // const timeout = 700;
-        // clearTimeout();
-        // setTimeout(() => {
-        //
-        // }, timeout);
-        // clearTimeout();
     }
 
     useEffect(() => {
@@ -119,7 +111,7 @@ const ListCreator = (props) => {
     }
 
     const filterLetters = (input) => {
-        return input.replace(/[^A-Za-züöäÜÖÄ-]/g, "")
+        return input.replace(/[^A-Za-züöäÜÖÄ -]/g, "")
     }
 
     const safeList = () => {

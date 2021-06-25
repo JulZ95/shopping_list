@@ -6,8 +6,6 @@
 
 .userField_homeUsers {
     display: flex;
-    /*flex-wrap: nowrap;*/
-    /*justify-content: center;*/
 
     border: solid 4px #d3394c;
     background-color: #e85668;
